@@ -10,3 +10,16 @@ demanda, ele é explicado uma vez em contexto e depois anotado aqui.
 ## Termos técnicos de dados
 <!-- ex: CDC (Change Data Capture) — técnica pra detectar o que mudou numa fonte de dados sem reprocessar tudo -->
 <!-- ex: Upsert — operação que insere um registro novo ou atualiza se já existir -->
+
+## Registrados na DE-001
+- **Ticket (DE-00X)** — registro numérico de uma demanda, com contexto, critério de aceite e prazo; permite rastrear quem pediu o quê e quando.
+- **PM (Product Manager)** — quem define prioridades e fala com o negócio; aqui, Ana.
+- **Definition of Ready (DoR)** — checklist de que a demanda está clara o bastante pra começar (contexto, critério de aceite, prazo).
+- **Definition of Done (DoD)** — checklist do que precisa estar pronto pra eu aprovar (erro tratado, dado validado, doc, teste).
+- **SLA** — prazo máximo combinado pra entregar/resolver algo; aqui, sexta 20/11.
+- **Sprint** — período fixo de trabalho (aqui, 2 semanas) em que o time se compromete com um conjunto de demandas.
+- **Dimensão (dim_)** — tabela de apoio com atributos descritivos (ex: calendário de feriados), usada para enriquecer análises.
+- **Idempotência** — rodar a mesma operação várias vezes dá o mesmo resultado que rodar uma; sem duplicar dados.
+- **Upsert** — insere o registro se for novo, atualiza se já existir.
+- **Backoff exponencial** — em retentativas, esperar mais a cada falha (1s, 2s, 4s…) para não sobrecarregar a fonte.
+- **Dados brutos (raw)** — cópia fiel do que a fonte devolveu, guardada sem alteração, para poder reprocessar depois.
