@@ -1,7 +1,9 @@
 import requests
 import json
-from pathlib import Path
+import time
 import logging
+from pathlib import Path
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -14,34 +16,36 @@ logging.basicConfig(
 
 anos = [2025, 2026, 2027]
 
-def captura_feriados(anos:list):
+def captura_feriados(anos: list):
 
     BASE_DIR = Path(__file__).resolve().parent.parent
-    pasta_raw = BASE_DIR / "data" / "raw" 
+    pasta_raw = BASE_DIR / "data" / "raw"
     pasta_raw.mkdir(parents=True, exist_ok=True)
 
     for ano in anos:
-        try:
-            logging.info(f'Consultando API para o ano {ano}...')
+        url = f"https://brasilapi.com.br/api/feriados/v1/{ano}"
 
-            url = f"https://brasilapi.com.br/api/feriados/v1/{ano}"
-            resposta = requests.get(url, timeout=10)
-            resposta.raise_for_status()
-            dados = resposta.json()
-        except Exception as e:
-            logging.error(f"Erro ao processar o ano {ano}: {e}")
+        for tentativa in range(3):
+            try:
+                logging.info(f'Consultando API para o ano {ano} (tentativa {tentativa + 1})...')
+                resposta = requests.get(url, timeout=10)
+                resposta.raise_for_status()
+                dados = resposta.json()
+                break
+            except Exception as e:
+                logging.warning(f"Tentativa {tentativa + 1} falhou para {ano}: {e}")
+                time.sleep(2)
+        else:
+            logging.error(f"Ano {ano} falhou após 3 tentativas.")
             continue
 
-        if dados == []:
+        if not dados:
             logging.warning(f"{ano} retornou sem nenhum dado.")
             continue
 
         logging.info(f'API consultada com sucesso para o ano de {ano}')
 
-        logging.info(f'Salvando arquivo de {ano}...')
-
-        nome_arquivo = f"feriados_{ano}.json"
-        caminho_arquivo = pasta_raw / nome_arquivo
+        caminho_arquivo = pasta_raw / f"feriados_{ano}.json"
 
         with open(caminho_arquivo, "w", encoding="utf-8") as arquivo:
             json.dump(dados, arquivo, ensure_ascii=False, indent=4)
