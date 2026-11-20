@@ -3,17 +3,6 @@ import logging
 from sqlalchemy import create_engine, URL, text
 from dotenv import load_dotenv
 
-load_dotenv()
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(message)s',
-    handlers=[
-        logging.FileHandler('pipeline.log'),
-        logging.StreamHandler()
-    ]
-)
-
 def criar_conexao():
 
     logging.info("Conectando ao banco de dados...")

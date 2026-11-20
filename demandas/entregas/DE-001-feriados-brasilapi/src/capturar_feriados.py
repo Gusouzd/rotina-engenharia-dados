@@ -4,6 +4,7 @@ import json
 import time
 from pathlib import Path
 
+
 def captura_feriados(anos: list):
 
     BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,12 +27,13 @@ def captura_feriados(anos: list):
 
             except requests.exceptions.HTTPError as e:
                 status = e.response.status_code
-                if 400 <= status < 500:
+                if status == 429 or status >= 500:
+                    logging.warning(f"Tentativa {tentativa + 1} falhou para {ano} (HTTP {status}, retry aplicável): {e}")
+                    if tentativa < 2:
+                        time.sleep(2 ** tentativa)
+                else:
                     logging.error(f"Erro {status} para o ano {ano} — requisição inválida, não adianta repetir.")
                     return None
-                logging.warning(f"Tentativa {tentativa + 1} falhou para {ano} (HTTP {status}): {e}")
-                if tentativa < 2:
-                    time.sleep(2 ** tentativa)
 
             except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
                 logging.warning(f"Tentativa {tentativa + 1} falhou para {ano} (conexão/timeout): {e}")

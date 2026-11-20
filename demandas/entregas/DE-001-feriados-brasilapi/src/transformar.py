@@ -1,6 +1,8 @@
 import logging
 import pandas as pd
 from pathlib import Path
+from datetime import datetime, timezone
+
 
 def tratamento():
 
@@ -17,23 +19,20 @@ def tratamento():
             dataframes[nome_arquivo] = pd.read_json(item)
     except Exception as e:
         logging.error(f"Erro ao transformar JSONs em Dataframes: {e}")
-        dataframes = {}
         return None
 
     logging.info("JSONs transformados com sucesso.")
-
     logging.info("Unificando, e realizando tratamentos no Dataframe...")
 
     try:
         df_geral = pd.concat(dataframes.values(), ignore_index=True)
         df_geral = df_geral[['date', 'name', 'type']]
         df_geral['ano'] = df_geral['date'].dt.year
-        df_geral['carregado_em'] = pd.Timestamp.now(tz="America/Sao_Paulo")
-        df_geral = df_geral.rename(columns={'date':'data', 'name':'nome', 'type': 'tipo'})
+        df_geral['carregado_em'] = datetime.now(timezone.utc)
+        df_geral = df_geral.rename(columns={'date': 'data', 'name': 'nome', 'type': 'tipo'})
     except Exception as e:
         logging.error(f"Erro ao unificar/transformar Dataframe: {e}")
         return None
 
     logging.info("Unificação e tratamentos realizados com sucesso.")
-
     return df_geral

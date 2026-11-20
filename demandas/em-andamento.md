@@ -59,3 +59,12 @@ Recomendados (não bloqueiam, mas Rafael vai perguntar):
 - `iterrows` + um `execute` por linha: ok com 42 linhas, mas procure como mandar o lote de uma vez.
 
 Pontos fortes: decisão 2 bem fundamentada; pipeline em módulos; carga numa única transação; testes cobrindo os 3 casos de erro.
+
+### Revisão 2 — 20/11/2026 (gestor)
+**Resultado: quase aprovado — 2 pendências pequenas.** Os 4 obrigatórios e os 3 recomendados foram corrigidos (conferido no código, commit 2eb2d17): captura só grava depois de todos os anos validados; retry sem sleep inútil e sem repetir 4xx; `SELECT 1` no início; carga em lote; conexão via `.env`.
+
+Pendências:
+1. **Regressão silenciosa:** `carregamento.py` agora cria `carregado_em DATE` (antes era `TIMESTAMPTZ`). Reexecutar no mesmo dia não muda nada, então o teste de idempotência do README ("`carregado_em` deve ser atualizado") deixa de ser verificável. Além disso, `CREATE TABLE IF NOT EXISTS` não altera a tabela que já existe no seu volume Docker. Corrija e explique como lidou com a tabela existente.
+2. **README desatualizado:** a decisão 1 ainda descreve "limpar `data/raw`", que não é mais o comportamento. O bloco "Contexto" está duplicado e o critério de aceite do template continua colado no topo.
+
+Observação (não bloqueia): 429 (rate limit) é 4xx mas merece retry; vale pensar nisso. E `logging.basicConfig` aparece em 3 módulos — só o primeiro a rodar vale; configure só no `main.py`.

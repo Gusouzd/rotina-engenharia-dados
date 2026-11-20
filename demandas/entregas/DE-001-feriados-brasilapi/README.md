@@ -33,31 +33,35 @@ Python, pandas, SQLAlchemy, PostgreSQL (via Docker Compose), pytest
 ## Como subir o ambiente
 
 ### 1. Clonar o repositório
-
+```
 git clone https://github.com/Gusouzd/rotina-engenharia-dados
 cd rotina-engenharia-dados/demandas/entregas/DE-001-feriados-brasilapi
+```
 
 ### 2. Configurar variáveis de ambiente
-
 Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
-
+```
 POSTGRES_USER=
 POSTGRES_PASSWORD=
-POSTGRES_HOST=localhost
-POSTGRES_PORT=5433
-POSTGRES_DB=feriados_db
+POSTGRES_HOST=
+POSTGRES_PORT=
+POSTGRES_DB=
+```
 
 ### 3. Subir o banco de dados (Docker Compose)
-
+```
 docker compose up -d
+```
 
 ### 4. Instalar as dependências Python
-
+```
 pip install -r requirements.txt
+```
 
 ## Como rodar o pipeline
-
+```
 python src/main.py
+```
 
 ## Como validar que funcionou
 Conecte no banco (via PgAdmin, DBeaver, ou `psql`) e rode:
@@ -69,11 +73,12 @@ SELECT COUNT(*) FROM dim_feriados;
 Pra confirmar a idempotência, rode o pipeline novamente — a contagem de linhas deve se manter igual, mas a coluna `carregado_em` das linhas deve ser atualizada.
 
 ## Como rodar os testes
-
+```
 pytest tests/
+```
 
 ## Estrutura do projeto
-
+```
 ├── src/
 │   ├── capturar_feriados.py
 │   ├── conectar_banco.py
@@ -86,15 +91,14 @@ pytest tests/
 ├── data/raw/
 ├── docker-compose.yml
 ├── requirements.txt
-├── README.md
 ├── venv/ (não versionado)
 └── .env (não versionado)
-
+```
 
 ## Decisões arquiteturais
 
-1 - Como o pipeline é "tudo ou nada". Decidi limpar a pasta data/raw caso algum ano falhe. Ou seja, ou salva todos os JSONs, ou não salva nenhum.
+1 - O pipeline é "tudo ou nada": a captura busca todos os anos primeiro, guardando os dados em memória, e só grava os arquivos JSON em disco depois de confirmar que todos os anos foram obtidos com sucesso. Isso evita que uma falha num ano apague ou corrompa dados de uma execução anterior.
 
 2 - Mesmo o "ON CONFLICT" lidando com conflito de chave no banco, adicionei uma validação de duplicatas antes da carga. Isso garante que, se a API retornar duas vezes a mesma data no mesmo lote, o problema seja detectado e o pipeline interrompido, em vez de o ON CONFLICT silenciosamente absorver a inconsistência sem nenhum alerta.
 
-3 - Resolvi colocar o que acontece com cada erro dentro do main.py para termos mais controle. Dentro das funções coloquei a maioria dos retornos como None, ou False, e só no main.py Coloco o return que irá pará-lo, e mostrar o motivo.
+3 - Resolvi colocar o que acontece com cada erro dentro do main.py para termos mais controle. Dentro das funções coloquei a maioria dos retornos como None, ou False, e só no main.py coloco o return que irá pará-lo, e mostrar o motivo.

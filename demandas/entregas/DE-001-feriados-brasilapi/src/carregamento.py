@@ -1,18 +1,10 @@
 import logging
 from sqlalchemy import text
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(message)s',
-    handlers=[
-        logging.FileHandler('pipeline.log'),
-        logging.StreamHandler()
-    ]
-)
 
 def carregar(engine, df):
 
-    logging.info("Executando a criação da tabela no postgres...")
+    logging.info("Executando a criação/migração da tabela no postgres...")
 
     try:
         with engine.connect() as conn:
@@ -22,11 +14,16 @@ def carregar(engine, df):
                     nome TEXT,
                     tipo TEXT,
                     ano INTEGER,
-                    carregado_em DATE
+                    carregado_em TIMESTAMPTZ
                 )
             """))
+            conn.execute(text("""
+                ALTER TABLE dim_feriados
+                ALTER COLUMN carregado_em TYPE TIMESTAMPTZ
+                USING carregado_em::timestamptz
+            """))
             conn.commit()
-        logging.info("Tabela criada com sucesso.")
+        logging.info("Tabela pronta (criada ou migrada) com sucesso.")
     except Exception as e:
         logging.error(f"Não foi possivel executar a query: {e}")
         return False
