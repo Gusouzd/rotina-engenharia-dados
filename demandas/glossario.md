@@ -23,3 +23,6 @@ demanda, ele é explicado uma vez em contexto e depois anotado aqui.
 - **Upsert** — insere o registro se for novo, atualiza se já existir.
 - **Backoff exponencial** — em retentativas, esperar mais a cada falha (1s, 2s, 4s…) para não sobrecarregar a fonte.
 - **Dados brutos (raw)** — cópia fiel do que a fonte devolveu, guardada sem alteração, para poder reprocessar depois.
+- **Ambiente virtual (venv)** — pasta isolada com o Python e as bibliotecas só deste projeto, para não misturar versões com outros projetos nem com o sistema.
+- **requirements.txt** — lista das bibliotecas (e versões) que o projeto precisa; permite que qualquer pessoa ou servidor reproduza o mesmo ambiente com um comando.
+- **Reprodutibilidade** — qualquer pessoa conseguir rodar o seu código do zero e obter o mesmo resultado, sem "na minha máquina funciona".

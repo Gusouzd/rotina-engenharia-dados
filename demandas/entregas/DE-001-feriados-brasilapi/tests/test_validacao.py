@@ -1,5 +1,8 @@
+import sys
 import pandas as pd
-from src.validacao import validar
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+from validacao import validar
 
 def test_validar_rejeita_nulos():
     df = pd.DataFrame({

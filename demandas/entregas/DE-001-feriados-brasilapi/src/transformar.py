@@ -1,7 +1,6 @@
 import logging
 import pandas as pd
 from pathlib import Path
-from datetime import date
 
 def tratamento():
 
