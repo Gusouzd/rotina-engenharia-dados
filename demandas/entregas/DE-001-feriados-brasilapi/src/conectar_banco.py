@@ -1,9 +1,18 @@
 import os
 import logging
-from sqlalchemy import create_engine, URL
+from sqlalchemy import create_engine, URL, text
 from dotenv import load_dotenv
 
 load_dotenv()
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(message)s',
+    handlers=[
+        logging.FileHandler('pipeline.log'),
+        logging.StreamHandler()
+    ]
+)
 
 def criar_conexao():
 
@@ -11,18 +20,22 @@ def criar_conexao():
 
     try:
         url = URL.create(
-        "postgresql+psycopg2",
-        username=os.environ['POSTGRES_USER'],
-        password=os.environ['POSTGRES_PASSWORD'],
-        host="localhost",
-        port=5433,
-        database="feriados_db"
+            "postgresql+psycopg2",
+            username=os.environ['POSTGRES_USER'],
+            password=os.environ['POSTGRES_PASSWORD'],
+            host=os.environ['POSTGRES_HOST'],
+            port=int(os.environ['POSTGRES_PORT']),
+            database=os.environ['POSTGRES_DB'],
         )
 
         engine = create_engine(url)
 
-    except Exception as e:
-        logging.error(f"Conexão malsucedida: {e}")  
-        return None  
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
 
+    except Exception as e:
+        logging.error(f"Conexão malsucedida: {e}")
+        return None
+
+    logging.info("Conexão com o banco estabelecida com sucesso.")
     return engine

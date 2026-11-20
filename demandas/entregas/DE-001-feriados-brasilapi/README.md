@@ -18,8 +18,6 @@ pediu uma tabela `dim_feriados` no PostgreSQL, alimentada por script, para
 
 Prazo: 20/11/2026.
 
-## Como rodar
-
 ## Contexto
 
 A Ana necessitava de uma planilha com os feriados, pois estavam calculando os dias úteis nos relatórios de SLA, com uma planilha que era mantida a mão, e já saiu errada duas vezes. E necessitava de algo confiável direto no PostgreSQL.
@@ -37,14 +35,17 @@ Python, pandas, SQLAlchemy, PostgreSQL (via Docker Compose), pytest
 ### 1. Clonar o repositório
 
 git clone https://github.com/Gusouzd/rotina-engenharia-dados
-cd demandas/entregas/DE-001-feriados-brasilapi
+cd rotina-engenharia-dados/demandas/entregas/DE-001-feriados-brasilapi
 
 ### 2. Configurar variáveis de ambiente
+
 Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
 
 POSTGRES_USER=
 POSTGRES_PASSWORD=
-POSTGRES_DB=
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5433
+POSTGRES_DB=feriados_db
 
 ### 3. Subir o banco de dados (Docker Compose)
 
@@ -82,11 +83,10 @@ pytest tests/
 │   └── main.py
 ├── tests/
 │   └── test_validacao.py
-├── conftest.py
 ├── data/raw/
 ├── docker-compose.yml
 ├── requirements.txt
-├── pipeline.log
+├── README.md
 ├── venv/ (não versionado)
 └── .env (não versionado)
 

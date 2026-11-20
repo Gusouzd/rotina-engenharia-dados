@@ -1,6 +1,15 @@
 import logging
 from sqlalchemy import text
 
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(message)s',
+    handlers=[
+        logging.FileHandler('pipeline.log'),
+        logging.StreamHandler()
+    ]
+)
+
 def carregar(engine, df):
 
     logging.info("Executando a criação da tabela no postgres...")
@@ -13,7 +22,7 @@ def carregar(engine, df):
                     nome TEXT,
                     tipo TEXT,
                     ano INTEGER,
-                    carregado_em TIMESTAMPTZ
+                    carregado_em DATE
                 )
             """))
             conn.commit()
@@ -25,20 +34,21 @@ def carregar(engine, df):
     logging.info("Adicionando os dados a tabela...")
 
     try:
+        dados = df.to_dict(orient="records")
+
         with engine.connect() as conn:
-            for _, linha in df.iterrows():
-                conn.execute(
-                    text("""
-                        INSERT INTO dim_feriados (data, nome, tipo, ano, carregado_em)
-                        VALUES (:data, :nome, :tipo, :ano, :carregado_em)
-                        ON CONFLICT (data) DO UPDATE SET
-                            nome = EXCLUDED.nome,
-                            tipo = EXCLUDED.tipo,
-                            ano = EXCLUDED.ano,
-                            carregado_em = EXCLUDED.carregado_em
-                    """),
-                    {"data": linha["data"], "nome": linha["nome"], "tipo": linha["tipo"], "ano": linha["ano"], "carregado_em": linha["carregado_em"],}
-                )
+            conn.execute(
+                text("""
+                    INSERT INTO dim_feriados (data, nome, tipo, ano, carregado_em)
+                    VALUES (:data, :nome, :tipo, :ano, :carregado_em)
+                    ON CONFLICT (data) DO UPDATE SET
+                        nome = EXCLUDED.nome,
+                        tipo = EXCLUDED.tipo,
+                        ano = EXCLUDED.ano,
+                        carregado_em = EXCLUDED.carregado_em
+                """),
+                dados
+            )
             conn.commit()
         logging.info("Dados adicionados com sucesso.")
     except Exception as e:

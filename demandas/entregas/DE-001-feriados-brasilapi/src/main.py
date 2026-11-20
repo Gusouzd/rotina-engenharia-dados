@@ -34,7 +34,7 @@ def pipeline():
         logging.error("Pipeline abortado: falha na transformação dos dados.")
         return
 
-    # Passo 4: Realizar a validação de datas e nulos (validação de duplicatas ja existe na hora de carregar o Dataframe com o 'ON CONFLICT')
+    # Passo 4: Realizar a validação de datas, nulos e duplicatas antes da carga
     validacao_ok = validar(df)
     if not validacao_ok:
         logging.error("Pipeline abortado: dados não passaram na validação.")

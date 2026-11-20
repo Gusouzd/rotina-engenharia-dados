@@ -4,7 +4,7 @@
 - Aberto em: 16/11/2026 | Prazo (SLA): sexta, 20/11/2026, fim do dia
 - Nível: júnior (demanda guiada — onboarding)
 - Solicitante: Ana (PM de dados) | Revisor: Rafael (Tech Lead)
-- Status: aberto
+- Status: em revisão — ajustes solicitados (20/11/2026)
 
 ### Contexto de negócio
 A Equipe de Analytics precisa calcular "dias úteis" nos relatórios de SLA de
@@ -42,3 +42,20 @@ Fonte: BrasilAPI — `GET https://brasilapi.com.br/api/feriados/v1/{ano}`
 Código em `demandas/entregas/DE-001-feriados-brasilapi/`. Me avise com um
 resumo das decisões que tomou (por que X e não Y) — é isso que Rafael vai
 perguntar na revisão.
+
+### Revisão 1 — 20/11/2026 (gestor)
+**Resultado: NÃO aprovado ainda — 4 ajustes obrigatórios, 3 recomendados.**
+Verificado: pytest 4/4 ok; 14 feriados por ano = 42 linhas (bate com o README); `.env` e `venv/` fora do Git.
+
+Obrigatórios:
+1. Decisão 1 (tudo ou nada) só vale em um dos dois caminhos de falha. Em `capturar_feriados.py`, "falhou após 3 tentativas" limpa `data/raw`; "resposta vazia" retorna sem limpar. Além disso, apagar a pasta inteira destrói uma carga anterior boa por causa de uma falha pontual. Pense: como garantir "tudo ou nada" sem perder o que já estava lá?
+2. `conectar_banco.py` ignora `POSTGRES_DB` do `.env` e fixa `feriados_db`, host e porta no código. Se o `.env` de alguém diferir, o compose cria um banco e o script conecta em outro.
+3. Comentário do passo 4 em `main.py` diz que a validação de duplicatas é feita pelo ON CONFLICT — contradiz a sua decisão 2 e o `validacao.py`. Comentário errado é pior que nenhum.
+4. README: o `git clone` + `cd` não funciona como escrito; `conftest.py` aparece na estrutura mas não existe; o bloco "Como rodar" do template ficou vazio acima do seu conteúdo; documente a porta 5433.
+
+Recomendados (não bloqueiam, mas Rafael vai perguntar):
+- Retry: dorme também depois da última tentativa (espera inútil), e repete até em 404/400, onde tentar de novo não adianta. Qual erro merece retry e qual não?
+- `criar_conexao()` não conecta de verdade (`create_engine` é preguiçoso), então o "Pipeline abortado: falha na conexão" nunca dispara. Como você testaria a conexão cedo?
+- `iterrows` + um `execute` por linha: ok com 42 linhas, mas procure como mandar o lote de uma vez.
+
+Pontos fortes: decisão 2 bem fundamentada; pipeline em módulos; carga numa única transação; testes cobrindo os 3 casos de erro.
