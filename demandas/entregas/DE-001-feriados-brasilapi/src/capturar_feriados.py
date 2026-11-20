@@ -1,20 +1,8 @@
+import logging
 import requests
 import json
 import time
-import logging
 from pathlib import Path
-
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(message)s',
-    handlers=[
-        logging.FileHandler('pipeline.log'),
-        logging.StreamHandler()
-    ]
-)
-
-anos = [2025, 2026, 2027]
 
 def captura_feriados(anos: list):
 
@@ -34,14 +22,17 @@ def captura_feriados(anos: list):
                 break
             except Exception as e:
                 logging.warning(f"Tentativa {tentativa + 1} falhou para {ano}: {e}")
-                time.sleep(2)
+                time.sleep(3 ** tentativa)
         else:
             logging.error(f"Ano {ano} falhou após 3 tentativas.")
-            continue
+            for item in pasta_raw.iterdir():
+                if item.is_file():
+                    item.unlink()
+            return None
 
         if not dados:
             logging.warning(f"{ano} retornou sem nenhum dado.")
-            continue
+            return None
 
         logging.info(f'API consultada com sucesso para o ano de {ano}')
 
@@ -52,4 +43,4 @@ def captura_feriados(anos: list):
 
         logging.info(f'Arquivo de {ano} salvo com sucesso.')
     
-captura_feriados([2025, 9999, 2026])
+    return True

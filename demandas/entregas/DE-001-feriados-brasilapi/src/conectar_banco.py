@@ -5,15 +5,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(message)s',
-    handlers=[
-        logging.FileHandler('pipeline.log'),
-        logging.StreamHandler()
-    ]
-)
-
 def criar_conexao():
 
     logging.info("Conectando ao banco de dados...")
@@ -31,6 +22,7 @@ def criar_conexao():
         engine = create_engine(url)
 
     except Exception as e:
-        logging.error(f"Conexão malsucedida: {e}")    
+        logging.error(f"Conexão malsucedida: {e}")  
+        return None  
 
     return engine
